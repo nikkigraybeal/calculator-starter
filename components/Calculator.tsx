@@ -1,4 +1,5 @@
 import Grid2 from "@mui/material/Unstable_Grid2";
+import { Operation } from "../enums/Operation";
 import {
   Box,
   Paper,
@@ -12,29 +13,25 @@ import {
 import { OutlinedInput } from "@mui/material";
 import axios from "axios";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, FormEvent, MouseEvent } from "react";
 
 const Calculator = () => {
-  const [operation, setOperation] = useState("");
-  const [result, setResult] = useState("");
-  const firstRef = useRef(null);
-  const secondRef = useRef(null);
+  const [operation, setOperation] = useState<string>("");
+  const [result, setResult] = useState<string>("");
+  const firstRef = useRef<HTMLInputElement>(null);
+  const secondRef = useRef<HTMLInputElement>(null);
   const welcomeMessage = "Calculator is ready!";
-
-  const handleChange = (e) => {
-    setOperation(e.target.value);
-  };
 
   useEffect(() => {
     setResult(welcomeMessage);
   }, []);
 
-  const handleCalculate = (e) => {
+  const handleCalculate = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const query = {
       operation: operation,
-      first: firstRef.current.value,
-      second: secondRef.current.value,
+      first: firstRef.current!.value,
+      second: secondRef.current!.value,
     };
 
     axios
@@ -47,14 +44,20 @@ const Calculator = () => {
       });
   };
 
-  const handleReset = (e) => {
+  const handleReset = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setOperation("");
     setResult(welcomeMessage);
-    firstRef.current.value = null;
-    secondRef.current.value = null;
-    document.querySelector("#operation").selectedIndex = 0;
+    firstRef.current!.value = "";
+    secondRef.current!.value = "";
   };
+
+  const operationOptions = {
+    [Operation.ADD]: "+",
+    [Operation.SUBTRACT]: "-",
+    [Operation.MULTIPLY]: "*",
+    [Operation.DIVIDE]: "/",
+  }
 
   return (
     <form id="calculator-form" onSubmit={handleCalculate}>
@@ -73,18 +76,19 @@ const Calculator = () => {
           <FormControl fullWidth>
             <NativeSelect
               input={<OutlinedInput />}
-              defaultValue={""}
+              value={operation}
               inputProps={{
                 name: "operation",
                 id: "operation",
               }}
-              onChange={handleChange}
+              onChange={e => setOperation(e.target.value)}
             >
               <option value="">Op</option>
-              <option value={"add"}>+</option>
-              <option value={"subtract"}>-</option>
-              <option value={"multiply"}>*</option>
-              <option value={"divide"}>/</option>
+              {Object.entries(operationOptions).map(([opName, opSymbol], idx) => {
+                return (
+                  <option key={idx} value={opName}>{opSymbol}</option>
+                )
+              })}
             </NativeSelect>
           </FormControl>
         </Grid2>
@@ -107,7 +111,7 @@ const Calculator = () => {
         </Grid2>
         <Grid2 xs={2}>
           <FormControl fullWidth>
-            <Button variant="outlines" onClick={handleReset}>
+            <Button variant="outlined" onClick={handleReset}>
               Reset
             </Button>
           </FormControl>

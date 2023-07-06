@@ -1,0 +1,10 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["./pages", "./components", "./utils"],
+  "entryPointStrategy": "expand",
+  "exclude": ["node_modules"],
+  "out": "docs",
+  "theme": "default",
+  "name": "The Amazing Calculator",
+
+}
